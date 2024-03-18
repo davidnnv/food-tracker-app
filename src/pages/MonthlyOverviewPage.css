@@ -1,0 +1,61 @@
+/* MonthlyOverviewPage.css */
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #222;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  color: #333;
+}
+
+p {
+  color: gray;
+}
+
+.meal-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.meal-card {
+  flex: 1;
+  margin-bottom: 2em;
+  padding: 20px;
+  background-color: #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+}
+
+.meal-card:hover {
+  transform: scale(1.05);
+}
+
+.meal-category {
+  margin-top: 10px;
+}
+
+h2 {
+  color: #555;
+  margin-bottom: 10px;
+}
+
+h3 {
+  color: #777;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 5px;
+  color: #444;
+}
