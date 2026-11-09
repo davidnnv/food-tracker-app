@@ -1,70 +1,43 @@
-# Getting Started with Create React App
+# Залак · Zalak — food tracker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A food diary built with React: log meals, see calories and macros at a glance, track water and weight, and spot patterns week by week. English and Macedonian, light and dark theme.
 
-## Available Scripts
+**Live:** https://davidnnv.github.io/food-tracker-app/ — tap **Try the demo** for an account with 4 weeks of sample meals.
 
-In the project directory, you can run:
+## Features
+- **Today** — animated calorie ring, protein/carbs/fat bars, four meals, week strip with a mini progress ring per day, logging streak
+- **Add food** — search 60 foods (incl. Macedonian dishes: burek, tavče gravče, ajvar, shopska…) in English or Macedonian, recent and favourites, portion sizes or grams, live nutrition preview
+- **Custom foods & quick add** — save your own foods, or log calories without picking a food
+- **Edit, move and delete** entries, with **undo**; copy a meal from yesterday in one tap
+- **Water** — animated tank and glass counter
+- **Insights** — 7/30-day calorie chart with goal line and tooltips (plus a table view), average macro split, most-logged foods, month calendar coloured by goal status
+- **Progress** — weight log with trend chart, change since start, BMI scale
+- **Onboarding** — calculates daily targets with the Mifflin–St Jeor formula from age, height, weight, activity and goal
+- **Settings** — profile, targets, language, theme, backup export/import, clear diary
+- Accounts and data live in the browser (`localStorage`); passwords are stored as salted SHA-256 hashes
 
-### `npm start`
+## Stack
+React 18 · Vite · React Router (hash routing for GitHub Pages) · Framer Motion · hand-drawn SVG charts · self-hosted Rubik + Golos Text fonts.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Run locally
+```bash
+npm install
+npm run dev     # http://localhost:5173
+npm run build   # production build in dist/
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Project structure
+```
+src/
+  data/foods.js        food database (per 100 g, EN + MK names, portion sizes)
+  lib/store.jsx        accounts, diary state, persistence, toasts
+  lib/i18n.js          all UI text in English and Macedonian
+  lib/nutrition.js     totals, targets calculator, BMI, day status
+  lib/demo.js          builds the 4-week demo diary
+  components/          ring, macro bars, week strip, meal card, add-food flow, charts…
+  pages/               Auth, Onboarding, Today, Insights, Progress, Settings
+```
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Deploy
+Every push to `main` builds and publishes to GitHub Pages (`.github/workflows/deploy.yml`).
+One-time setup: **Settings → Pages → Source: GitHub Actions**.
