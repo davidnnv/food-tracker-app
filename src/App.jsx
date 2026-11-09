@@ -10,6 +10,8 @@ import Settings from './pages/Settings.jsx';
 import Logo from './components/Logo.jsx';
 import Icon from './components/Icon.jsx';
 import { Toasts, page } from './components/ui.jsx';
+import UserMenu, { initials } from './components/UserMenu.jsx';
+import CookieBanner from './components/CookieBanner.jsx';
 
 const NAV = [
   { to: '/', key: 'today', icon: 'today' },
@@ -19,8 +21,9 @@ const NAV = [
 ];
 
 function Shell() {
-  const { t } = useStore();
+  const { t, account, data, logout } = useStore();
   const location = useLocation();
+  const name = data?.profile.name || account?.name || '';
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -41,7 +44,17 @@ function Shell() {
             ))}
           </ul>
         </nav>
+        <div className="side-user">
+          <span className="avatar">{initials(name, account?.email)}</span>
+          <div className="side-who"><b>{name}</b><span className="muted small">{account?.email}</span></div>
+          <button type="button" className="icon-btn ghost" onClick={logout} aria-label={t('logout')} title={t('logout')}><Icon name="logout" size={18} /></button>
+        </div>
       </aside>
+
+      <header className="topbar">
+        <span className="topbar-logo"><Logo /></span>
+        <UserMenu />
+      </header>
 
       <main className="content" id="main">
         <AnimatePresence mode="wait">
@@ -85,6 +98,7 @@ function Gate() {
           {view === 'auth' ? <Auth /> : view === 'onboarding' ? <Onboarding /> : <Shell />}
         </motion.div>
       </AnimatePresence>
+      <CookieBanner />
       <Toasts />
     </>
   );

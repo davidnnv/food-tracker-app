@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useStore } from '../lib/store.jsx';
 import { Field } from '../components/AddFood.jsx';
@@ -6,9 +6,16 @@ import Logo from '../components/Logo.jsx';
 import Icon from '../components/Icon.jsx';
 
 export default function Auth() {
-  const { t, signup, login, loginDemo, prefs, setPref } = useStore();
+  const { t, signup, login, loginDemo, prefs, setPref, toast } = useStore();
   const [mode, setMode] = useState('login');
-  const [v, setV] = useState({ name: '', email: '', password: '' });
+  const [v, setV] = useState({ name: '', email: '', password: '', remember: true });
+
+  // After a log-out reload, say goodbye once.
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem('zalak:loggedOut')) { sessionStorage.removeItem('zalak:loggedOut'); toast(t('loggedOut')); }
+    } catch {}
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [err, setErr] = useState({});
   const [busy, setBusy] = useState(false);
   const set = (k) => (e) => setV((s) => ({ ...s, [k]: e.target.value }));
@@ -72,6 +79,11 @@ export default function Auth() {
             <Field id="a-password" label={t('password')} error={err.password}>
               <input id="a-password" type="password" value={v.password} onChange={set('password')} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
             </Field>
+            <label className="check">
+              <input type="checkbox" id="a-remember" checked={v.remember} onChange={(e) => setV((s) => ({ ...s, remember: e.target.checked }))} />
+              <span className="check-box" aria-hidden="true"><Icon name="check" size={14} /></span>
+              <span><b>{t('rememberMe')}</b> <span className="muted small">· {t('rememberHint')}</span></span>
+            </label>
             <AnimatePresence>{err.form && <motion.p className="form-error" role="alert" initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: [0, -6, 6, -3, 0] }} exit={{ opacity: 0 }}>{err.form}</motion.p>}</AnimatePresence>
             <button type="submit" className="btn btn-primary btn-block" disabled={busy}>{busy ? t('working') : mode === 'login' ? t('login') : t('signup')}</button>
           </form>

@@ -14,7 +14,9 @@ A food diary built with React: log meals, see calories and macros at a glance, t
 - **Progress** — weight log with trend chart, change since start, BMI scale
 - **Onboarding** — calculates daily targets with the Mifflin–St Jeor formula from age, height, weight, activity and goal
 - **Settings** — profile, targets, language, theme, backup export/import, clear diary
-- Accounts and data live in the browser (`localStorage`); passwords are stored as salted SHA-256 hashes
+- **Account menu on every page** (avatar, top right) with settings, language, theme, cookie settings and **log out**; log out is also in the sidebar. Logging out reloads the app on the login screen.
+- **Cookies with a consent banner** — `zalak_session` (login, 30 days or until the browser closes if “Keep me logged in” is off), `zalak_consent` (your choice), `zalak_prefs` (language and theme, only if you allow preference cookies). Change the choice any time in the account menu or Settings.
+- Diary data lives in the browser (`localStorage`); passwords are stored as salted SHA-256 hashes
 
 ## Stack
 React 18 · Vite · React Router (hash routing for GitHub Pages) · Framer Motion · hand-drawn SVG charts · self-hosted Rubik + Golos Text fonts.

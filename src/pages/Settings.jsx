@@ -9,7 +9,7 @@ import Icon from '../components/Icon.jsx';
 const rise = { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.2, 0.8, 0.2, 1] } } };
 
 export default function Settings() {
-  const { data, t, prefs, setPref, setProfile, setGoals, account, logout, resetDiary, importData, toast } = useStore();
+  const { data, t, prefs, setPref, setProfile, setGoals, account, logout, resetDiary, importData, toast, consent, setCookiePanel } = useStore();
   const [p, setP] = useState(data.profile);
   const [g, setG] = useState(data.goals);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -99,6 +99,12 @@ export default function Settings() {
           <div className="field"><span className="label">{t('theme')}</span>
             <Segmented label={t('theme')} value={prefs.theme} onChange={(v) => setPref('theme', v)}
               options={['system', 'light', 'dark'].map((x) => ({ value: x, label: t('theme_' + x) }))} /></div>
+          <div className="field"><span className="label">{t('cookiesSection')}</span>
+            <div className="cookie-line">
+              <span className="muted small">{t('cookiesStatus', { s: consent?.preferences ? t('on') : t('off') })}</span>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setCookiePanel(true)}><Icon name="cookie" size={16} /> {t('cookieSettings')}</button>
+            </div>
+          </div>
         </motion.section>
 
         <motion.section className="card form" variants={rise} aria-labelledby="dt-h">

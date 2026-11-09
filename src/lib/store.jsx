@@ -6,6 +6,7 @@ import { DEFAULT_GOALS, scale } from './nutrition.js';
 import { addDays } from './dates.js';
 import { buildDemo } from './demo.js';
 import { FOODS } from '../data/foods.js';
+import { COOKIE, getCookie, getJSONCookie, removeCookie, setCookie } from './cookies.js';
 
 const KEY = { accounts: 'zalak:accounts', session: 'zalak:session', prefs: 'zalak:prefs', data: (id) => `zalak:data:${id}` };
 
@@ -32,22 +33,36 @@ export const emptyData = () => ({
 const Ctx = createContext(null);
 export const useStore = () => useContext(Ctx);
 
-function initialLang() {
-  const p = read(KEY.prefs, null);
-  if (p?.lang) return p.lang;
-  return (navigator.language || '').toLowerCase().startsWith('mk') ? 'mk' : 'en';
+function initialPrefs() {
+  const saved = getJSONCookie(COOKIE.prefs) || read(KEY.prefs, null) || {};
+  const lang = saved.lang || ((navigator.language || '').toLowerCase().startsWith('mk') ? 'mk' : 'en');
+  return { theme: 'system', ...saved, lang };
+}
+
+function initialSession() {
+  const fromCookie = getCookie(COOKIE.session);
+  if (fromCookie) return fromCookie;
+  const legacy = read(KEY.session, null); // older versions kept the session in localStorage
+  if (legacy) { setCookie(COOKIE.session, legacy, 30); remove(KEY.session); }
+  return legacy;
 }
 
 export function StoreProvider({ children }) {
-  const [prefs, setPrefs] = useState(() => ({ theme: 'system', ...read(KEY.prefs, {}), lang: initialLang() }));
-  const [userId, setUserId] = useState(() => read(KEY.session, null));
-  const [account, setAccount] = useState(() => (read(KEY.accounts, []).find((a) => a.id === read(KEY.session, null)) || null));
+  const [prefs, setPrefs] = useState(initialPrefs);
+  const [consent, setConsentState] = useState(() => getJSONCookie(COOKIE.consent));
+  const [userId, setUserId] = useState(initialSession);
+  const [account, setAccount] = useState(() => (read(KEY.accounts, []).find((a) => a.id === userId) || null));
   const [data, setData] = useState(() => (userId ? { ...emptyData(), ...read(KEY.data(userId), {}) } : null));
   const [toasts, setToasts] = useState([]);
+  const [cookiePanel, setCookiePanel] = useState(false);
   const toastTimers = useRef({});
 
-  // Persist
-  useEffect(() => write(KEY.prefs, prefs), [prefs]);
+  // Persist. Preferences go in a cookie only if the user allowed preference cookies.
+  useEffect(() => {
+    remove(KEY.prefs);
+    if (consent?.preferences) setCookie(COOKIE.prefs, JSON.stringify({ lang: prefs.lang, theme: prefs.theme }), 365);
+    else removeCookie(COOKIE.prefs);
+  }, [prefs, consent]);
   useEffect(() => { if (userId && data) write(KEY.data(userId), data); }, [userId, data]);
 
   // Theme + language on <html>
@@ -70,12 +85,12 @@ export function StoreProvider({ children }) {
   const dismissToast = useCallback((id) => { clearTimeout(toastTimers.current[id]); setToasts((ts) => ts.filter((x) => x.id !== id)); }, []);
 
   // ---------- auth ----------
-  const startSession = (acc, d) => {
-    write(KEY.session, acc.id);
+  const startSession = (acc, d, remember = true) => {
+    setCookie(COOKIE.session, acc.id, remember ? 30 : null);
     setAccount(acc); setUserId(acc.id); setData(d);
   };
 
-  const signup = async ({ name, email, password }) => {
+  const signup = async ({ name, email, password, remember = true }) => {
     const accounts = read(KEY.accounts, []);
     const e = email.trim().toLowerCase();
     if (accounts.some((a) => a.email === e)) throw new Error('errExists');
@@ -84,13 +99,13 @@ export function StoreProvider({ children }) {
     write(KEY.accounts, [...accounts, acc]);
     const d = emptyData(); d.profile.name = acc.name;
     write(KEY.data(acc.id), d);
-    startSession(acc, d);
+    startSession(acc, d, remember);
   };
 
-  const login = async ({ email, password }) => {
+  const login = async ({ email, password, remember = true }) => {
     const acc = read(KEY.accounts, []).find((a) => a.email === email.trim().toLowerCase());
     if (!acc || (await hash(password, acc.salt)) !== acc.hash) throw new Error('errLogin');
-    startSession(acc, { ...emptyData(), ...read(KEY.data(acc.id), {}) });
+    startSession(acc, { ...emptyData(), ...read(KEY.data(acc.id), {}) }, remember);
   };
 
   const loginDemo = async () => {
@@ -106,7 +121,20 @@ export function StoreProvider({ children }) {
     startSession(acc, d);
   };
 
-  const logout = () => { remove(KEY.session); setUserId(null); setAccount(null); setData(null); };
+  // Log out: clear the session cookie and reload the app on the login screen.
+  // A full reload guarantees no screen keeps showing the previous user's data.
+  const logout = () => {
+    removeCookie(COOKIE.session);
+    remove(KEY.session);
+    try { sessionStorage.setItem('zalak:loggedOut', '1'); } catch {}
+    window.location.replace(window.location.pathname + window.location.search);
+  };
+
+  const setConsent = (c) => {
+    const value = { necessary: true, preferences: !!c.preferences, date: new Date().toISOString() };
+    setCookie(COOKIE.consent, JSON.stringify(value), 365);
+    setConsentState(value);
+  };
 
   // ---------- diary ----------
   const update = useCallback((fn) => setData((d) => ({ ...d, ...fn(d) })), []);
@@ -187,7 +215,7 @@ export function StoreProvider({ children }) {
   const setPref = (k, v) => setPrefs((p) => ({ ...p, [k]: v }));
 
   const value = {
-    prefs, setPref, t, lang: prefs.lang, foodName,
+    prefs, setPref, t, lang: prefs.lang, foodName, consent, setConsent, cookiePanel, setCookiePanel,
     account, data, signup, login, loginDemo, logout,
     allFoods, findFood,
     addEntry, addQuick, updateEntry, removeEntry, copyMeal, setWater, saveWeight, removeWeight,
